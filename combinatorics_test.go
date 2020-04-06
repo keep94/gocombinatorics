@@ -53,6 +53,16 @@ func TestPermutations(t *testing.T) {
   assert.Panics(func() { gocombinatorics.Permutations(-1, 3) })
 }
 
+func BenchmarkPermutations(b *testing.B) {
+  stream := gocombinatorics.Permutations(50, 50)
+  values := make([]int, 50)
+  for i := 0; i < b.N; i++ {
+    if !stream.Next(values) {
+      stream.Reset()
+    }
+  }
+}
+
 func TestProduct(t *testing.T) {
   assert := assert.New(t)
   stream := gocombinatorics.Product(3, 2)
@@ -89,27 +99,20 @@ func assertStreamOnce(
     tupleSize int,
     results ...string) {
   t.Helper()
-  resultsSet := buildSet(results)
   assert := assert.New(t)
   values := make([]int, tupleSize)
+  idx := 0
   for stream.Next(values) {
-    valueStr := asString(values)
-    makeZero(values)
-    if _, ok := resultsSet[valueStr]; !ok {
-      assert.Failf("not in result set", valueStr)
+    if idx == len(results) {
+      assert.Fail("Stream should have quit emitting values")
       return
     }
-    delete(resultsSet, valueStr)
+    valueStr := asString(values)
+    makeZero(values)
+    assert.Equal(results[idx], valueStr)
+    idx++
   }
-  assert.Equal(0, len(resultsSet))
-}
-
-func buildSet(results []string) map[string]struct{} {
-  result := make(map[string]struct{}, len(results))
-  for _, r := range results {
-    result[r] = struct{}{}
-  }
-  return result
+  assert.Equal(len(results), idx)
 }
 
 func makeZero(values []int) {

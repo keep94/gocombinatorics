@@ -22,8 +22,7 @@ type Stream interface {
 // inclusive where order matters. The returned Stream's Next method will
 // yield k-tuples.
 //
-// For instance Permutations(4,2) will yield the following tuples but not
-// necessarily in the same order:
+// For instance, Permutations(4,2) yields
 // (0,1), (0,2), (0,3), (1,0), (1,2), (1,3),
 // (2,0), (2,1), (2,3), (3,0), (3,1), (3,2)
 func Permutations(n, k int) Stream {
@@ -34,7 +33,7 @@ func Permutations(n, k int) Stream {
     panic("k must be greater than or equal to 0")
   }
   result := &permutations{
-      items: make([]int, n),
+      unused: newIntSet(n),
       values: make([]int, k),
       n: n,
       k: k,
@@ -51,7 +50,7 @@ func Permutations(n, k int) Stream {
 // at least 1; the 2nd value in a tuple must be at least 2 etc.
 // None of the values in a tuple can be greater than k.
 //
-// For instance OpsPosits(4) yeilds
+// For instance, OpsPosits(4) yeilds
 // (1,2,3,4), (1,2,4,4), (1,3,3,4), (1,3,4,4), (1,4,4,4), (2,2,3,4)
 // (2,2,4,4), (2,3,3,4), (2,3,4,4), (2,4,4,4), (3,3,3,4), (3,3,4,4)
 // (3,4,4,4), (4,4,4,4)
@@ -127,7 +126,7 @@ func max(i, j int) int {
 }
 
 type permutations struct {
-  items []int
+  unused *intSet
   values []int
   n int
   k int
@@ -141,39 +140,46 @@ func (p *permutations) Next(values []int) bool {
   if p.done {
     return false
   }
-  p.populate(values)
+  copy(values, p.values)
   p.increment()
   return true
 }
 
 func (p *permutations) Reset() {
   p.done = p.k > p.n
-  for i := 0; i < p.k; i++ {
-    p.values[i] = 0
-  }
-}
-
-func (p *permutations) populate(values []int) {
-  for i := 0; i < p.n; i++ {
-    p.items[i] = i
+  if p.done {
+    return
   }
   for i := 0; i < p.k; i++ {
-    values[i] = p.items[p.values[i]]
-    p.items[p.values[i]] = p.items[p.n - i - 1]
+    p.values[i] = i
+    p.unused.Remove(i)
+  }
+  for i := p.k; i < p.n; i++ {
+    p.unused.Add(i)
   }
 }
 
 func (p *permutations) increment() {
   idx := p.k - 1
-  for idx >= 0 && p.values[idx] == p.n - idx - 1 {
-    p.values[idx] = 0
+  for idx >= 0 {
+    p.unused.Add(p.values[idx])
+    p.values[idx] = p.unused.Next(p.values[idx]+1)
+    if p.values[idx] != -1 {
+      p.unused.Remove(p.values[idx])
+      break
+    }
     idx--
   }
   if idx < 0 {
     p.done = true
     return
   }
-  p.values[idx]++
+  last := -1
+  for i := idx + 1; i < p.k; i++ {
+    p.values[i] = p.unused.Next(last+1)
+    p.unused.Remove(p.values[i])
+    last = p.values[i]
+  }
 }
 
 type product struct {
