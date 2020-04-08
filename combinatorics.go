@@ -126,8 +126,13 @@ func max(i, j int) int {
 }
 
 type permutations struct {
+  // Everything except the values preceding the value being changed.
+  // But if k = 0 unsed is the empty set.
   unused *intSet
+
+  // The values of the current tuple
   values []int
+
   n int
   k int
   done bool
@@ -147,38 +152,63 @@ func (p *permutations) Next(values []int) bool {
 
 func (p *permutations) Reset() {
   p.done = p.k > p.n
-  if p.done {
+  if p.done || p.k == 0 {
     return
   }
   for i := 0; i < p.k; i++ {
     p.values[i] = i
+  }
+
+  // The last value will get changed so unused to contain everything
+  // except the values preceding the last value in the tuple.
+  for i := 0; i < p.k - 1; i++ {
     p.unused.Remove(i)
   }
-  for i := p.k; i < p.n; i++ {
+  for i := p.k - 1; i < p.n; i++ {
     p.unused.Add(i)
   }
 }
 
 func (p *permutations) increment() {
-  idx := p.k - 1
-  for idx >= 0 {
-    p.unused.Add(p.values[idx])
-    p.values[idx] = p.unused.Next(p.values[idx]+1)
-    if p.values[idx] != -1 {
-      p.unused.Remove(p.values[idx])
-      break
-    }
-    idx--
-  }
-  if idx < 0 {
+
+  // Special case: when k=0 there is one permutation so we are done as
+  // soon as we increment.
+  if p.k == 0 {
     p.done = true
     return
   }
+  idx := p.k - 1
+
+  // Increment the last value
+  p.values[idx] = p.unused.Next(p.values[idx]+1)
+
+  // If we reached the end, try to increment the previous value while
+  // keeping the invariant that p.unused is everything except the values
+  // preceding the value being incremented.
+  for p.values[idx] == -1 {
+
+    // If we reached the end when incrementing the very first value then
+    // we are done.
+    if idx == 0 {
+      p.done = true
+      return
+    }
+    idx--
+    p.unused.Add(p.values[idx])
+    p.values[idx] = p.unused.Next(p.values[idx]+1)
+  }
+
+  // After we have successfully incremented a value, fill in the slots
+  // that come after that value with the smallest possible values.
   last := -1
-  for i := idx + 1; i < p.k; i++ {
-    p.values[i] = p.unused.Next(last+1)
-    p.unused.Remove(p.values[i])
-    last = p.values[i]
+  for idx < p.k - 1 {
+    p.unused.Remove(p.values[idx])
+    idx++
+    p.values[idx] = p.unused.Next(last+1)
+
+    // We know the next value we fill in has to be at least one greater
+    // then the this value
+    last = p.values[idx]
   }
 }
 
