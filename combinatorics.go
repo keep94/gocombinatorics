@@ -32,9 +32,15 @@ func Permutations(n, k int) Stream {
   if k < 0 {
     panic("k must be greater than or equal to 0")
   }
+  var unused *intSet
+  var values []int
+  if k > 0 {
+    unused = newIntSet(n)
+    values = make([]int, k)
+  }
   result := &permutations{
-      unused: newIntSet(n),
-      values: make([]int, k),
+      unused: unused,
+      values: values,
       n: n,
       k: k,
   }
@@ -127,7 +133,7 @@ func max(i, j int) int {
 
 type permutations struct {
   // Everything except the values preceding the value being changed.
-  // But if k = 0 unsed is the empty set.
+  // But if k = 0 unused is nil, the empty set.
   unused *intSet
 
   // The values of the current tuple
