@@ -105,7 +105,7 @@ func sorted(aSlice []int) []int {
   return result
 }
 
-func asSlice(s *intSet) []int {
+func asSlice(s intSet) []int {
   result := make([]int, 0, s.Len())
   for i := s.Next(0); i != -1; i = s.Next(i+1) {
     result = append(result, i)
