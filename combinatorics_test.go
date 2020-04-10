@@ -45,7 +45,31 @@ func TestCombinations(t *testing.T) {
   assert.Panics(func() { gocombinatorics.Combinations(3, -1) })
   assert.Panics(func() { gocombinatorics.Combinations(-1, 3) })
 }
-  
+
+func TestCombinationsWithReplacement(t *testing.T) {
+  assert := assert.New(t)
+  stream := gocombinatorics.CombinationsWithReplacement(2, 3)
+  assertStream(t, stream, 3,
+      "0 0 0", "0 0 1", "0 1 1", "1 1 1")
+  stream = gocombinatorics.CombinationsWithReplacement(3, 4)
+  assertStream(t, stream, 4,
+      "0 0 0 0", "0 0 0 1", "0 0 0 2", "0 0 1 1", "0 0 1 2", "0 0 2 2",
+      "0 1 1 1", "0 1 1 2", "0 1 2 2", "0 2 2 2", "1 1 1 1", "1 1 1 2",
+      "1 1 2 2", "1 2 2 2", "2 2 2 2")
+  stream = gocombinatorics.CombinationsWithReplacement(4, 2)
+  assertStream(t, stream, 2,
+      "0 0", "0 1", "0 2", "0 3", "1 1", "1 2", "1 3", "2 2", "2 3", "3 3")
+  stream = gocombinatorics.CombinationsWithReplacement(4, 1)
+  assertStream(t, stream, 1, "0", "1", "2", "3")
+  stream = gocombinatorics.CombinationsWithReplacement(0, 5)
+  assertStream(t, stream, 5)
+  stream = gocombinatorics.CombinationsWithReplacement(0, 0)
+  assertStream(t, stream, 0, "")
+  stream = gocombinatorics.CombinationsWithReplacement(1, 0)
+  assertStream(t, stream, 0, "")
+  assert.Panics(func() { gocombinatorics.CombinationsWithReplacement(3, -1) })
+  assert.Panics(func() { gocombinatorics.CombinationsWithReplacement(-1, 3) })
+}
 
 func TestPermutations(t *testing.T) {
   assert := assert.New(t)

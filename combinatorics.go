@@ -53,7 +53,7 @@ func Permutations(n, k int) Stream {
 // method will yield k-tuples.
 //
 // For instance, Combinations(4,2) yields
-// (0,1), (0,2), (0,3), (1,2), (1,3), (2,3),
+// (0,1), (0,2), (0,3), (1,2), (1,3), (2,3)
 func Combinations(n, k int) Stream {
   if n < 0 {
     panic("n must be greater than or equal to 0")
@@ -62,6 +62,26 @@ func Combinations(n, k int) Stream {
     panic("k must be greater than or equal to 0")
   }
   result := &combinations{
+      values: make([]int, k),
+      n: n,
+      k: k,
+  }
+  result.Reset()
+  return result
+}
+
+// CombinationsWithReplacement is like Combinations except that
+// returned tuples may contain duplicates. For instance,
+// CombinationsWithReplacement(4, 2) yields
+// (0,0), (0,1), (0,2), (0,3), (1,1), (1,2), (1,3), (2,2), (2,3), (3,3)
+func CombinationsWithReplacement(n, k int) Stream {
+  if n < 0 {
+    panic("n must be greater than or equal to 0")
+  }
+  if k < 0 {
+    panic("k must be greater than or equal to 0")
+  }
+  result := &combinationsWithReplacement{
       values: make([]int, k),
       n: n,
       k: k,
@@ -147,6 +167,50 @@ func (c *combinations) increment() {
   c.values[idx]++
   for i := idx + 1; i < c.k; i++ {
     c.values[i] = c.values[idx] + i - idx
+  }
+}
+
+type combinationsWithReplacement struct {
+  values []int
+  n int
+  k int
+  done bool
+}
+
+func (c *combinationsWithReplacement) Next(values []int) bool {
+  if len(values) < c.k {
+    panic(kSliceTooSmall)
+  }
+  if c.done {
+    return false
+  }
+  copy(values, c.values)
+  c.increment()
+  return true
+}
+
+func (c *combinationsWithReplacement) Reset() {
+  c.done = c.n == 0 && c.k > 0
+  if c.done {
+    return
+  }
+  for i := 0; i < c.k; i++ {
+    c.values[i] = 0
+  }
+}
+
+func (c *combinationsWithReplacement) increment() {
+  idx := c.k - 1
+  for idx >= 0 && c.values[idx] == c.n - 1 {
+    idx--
+  }
+  if idx < 0 {
+    c.done = true
+    return
+  }
+  c.values[idx]++
+  for i := idx + 1; i < c.k; i++ {
+    c.values[i] = c.values[idx]
   }
 }
 
