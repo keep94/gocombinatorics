@@ -24,6 +24,29 @@ func TestOpsPosits(t *testing.T) {
   assert.Panics(func() { gocombinatorics.OpsPosits(-1) })
 }
 
+func TestCombinations(t *testing.T) {
+  assert := assert.New(t)
+  stream := gocombinatorics.Combinations(5, 3)
+  assertStream(t, stream, 3,
+      "0 1 2", "0 1 3", "0 1 4", "0 2 3", "0 2 4",
+      "0 3 4", "1 2 3", "1 2 4", "1 3 4", "2 3 4")
+  stream = gocombinatorics.Combinations(5, 5)
+  assertStream(t, stream, 5, "0 1 2 3 4")
+  stream = gocombinatorics.Combinations(5, 1)
+  assertStream(t, stream, 1, "0", "1", "2", "3", "4")
+  stream = gocombinatorics.Combinations(5, 0)
+  assertStream(t, stream, 0, "")
+  stream = gocombinatorics.Combinations(5, 6)
+  assertStream(t, stream, 6)
+  stream = gocombinatorics.Combinations(0, 0)
+  assertStream(t, stream, 0, "")
+  stream = gocombinatorics.Combinations(0, 1)
+  assertStream(t, stream, 1)
+  assert.Panics(func() { gocombinatorics.Combinations(3, -1) })
+  assert.Panics(func() { gocombinatorics.Combinations(-1, 3) })
+}
+  
+
 func TestPermutations(t *testing.T) {
   assert := assert.New(t)
   stream := gocombinatorics.Permutations(4, 2)
@@ -55,6 +78,16 @@ func TestPermutations(t *testing.T) {
 
 func BenchmarkPermutations(b *testing.B) {
   stream := gocombinatorics.Permutations(50, 50)
+  values := make([]int, 50)
+  for i := 0; i < b.N; i++ {
+    if !stream.Next(values) {
+      stream.Reset()
+    }
+  }
+}
+
+func BenchmarkCombinations(b *testing.B) {
+  stream := gocombinatorics.Permutations(100, 50)
   values := make([]int, 50)
   for i := 0; i < b.N; i++ {
     if !stream.Next(values) {

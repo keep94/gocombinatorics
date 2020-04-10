@@ -48,6 +48,28 @@ func Permutations(n, k int) Stream {
   return result
 }
 
+// Combinations yields all the ways you can pick k ints from 0 to n-1
+// inclusive where order does not matter. The returned Stream's Next
+// method will yield k-tuples.
+//
+// For instance, Combinations(4,2) yields
+// (0,1), (0,2), (0,3), (1,2), (1,3), (2,3),
+func Combinations(n, k int) Stream {
+  if n < 0 {
+    panic("n must be greater than or equal to 0")
+  }
+  if k < 0 {
+    panic("k must be greater than or equal to 0")
+  }
+  result := &combinations{
+      values: make([]int, k),
+      n: n,
+      k: k,
+  }
+  result.Reset()
+  return result
+}
+
 // OpsPosits yields all the possible positions of k binary operators in a
 // postfix expression as a sequence of k-tuples. A value of 0 means the
 // operator comes after the first number; 1 means the operator comes after
@@ -82,6 +104,50 @@ func Product(n, k int) Stream {
   result := &product{values: make([]int, k), n: n, k: k}
   result.Reset()
   return result
+}
+
+type combinations struct {
+  values []int
+  n int
+  k int
+  done bool
+}
+
+func (c *combinations) Next(values []int) bool {
+  if len(values) < c.k {
+    panic(kSliceTooSmall)
+  }
+  if c.done {
+    return false
+  }
+  copy(values, c.values)
+  c.increment()
+  return true
+}
+
+func (c *combinations) Reset() {
+  c.done = c.k > c.n
+  if c.done {
+    return
+  }
+  for i := 0; i < c.k; i++ {
+    c.values[i] = i
+  }
+}
+
+func (c *combinations) increment() {
+  idx := c.k - 1
+  for idx >= 0 && c.values[idx] == c.n - c.k + idx {
+    idx--
+  }
+  if idx < 0 {
+    c.done = true
+    return
+  }
+  c.values[idx]++
+  for i := idx + 1; i < c.k; i++ {
+    c.values[i] = c.values[idx] + i - idx
+  }
 }
 
 type opsPosits struct {
