@@ -456,6 +456,9 @@ func (p *product) Next(values []int) bool {
 
 func (p *product) Reset() {
   p.done = p.n == 0 && p.k > 0
+  if p.done {
+    return
+  }
   for i := 0; i < p.k; i++ {
     p.values[i] = 0
   }
