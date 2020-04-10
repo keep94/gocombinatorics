@@ -153,35 +153,39 @@ func TestCartesian(t *testing.T) {
   assert.Panics(func() { gocombinatorics.Cartesian(3, -1) })
 }
 
+// Reads first tuple off stream, resets it, then reads first 2 tuples off
+// stream, resets again, then reads first 3 tuples off stream etc. until
+// all expected tuples are read off stream.
 func assertStream(
-    t *testing.T,
-    stream gocombinatorics.Stream,
-    results ...string) {
-  t.Helper()
-  assertStreamOnce(t, stream, results...)
-  stream.Reset()
-  assertStreamOnce(t, stream, results...)
-}
-
-func assertStreamOnce(
     t *testing.T,
     stream gocombinatorics.Stream,
     results ...string) {
   t.Helper()
   assert := assert.New(t)
   values := make([]int, stream.TupleSize())
-  idx := 0
-  for stream.Next(values) {
-    if idx == len(results) {
-      assert.Fail("Stream should have quit emitting values")
-      return
+
+  // Go to len(results) + 1 so that we have a chance to reset the stream
+  // after exhausing it.
+  for i := 0; i <= len(results) + 1; i++ {
+    for j := 0; j <= i; j++ {
+      hasMore := stream.Next(values)
+      if j >= len(results) {
+        if !assert.False(hasMore, "There shouldn't be more tuples") {
+          return
+        }
+      } else {
+        if !assert.True(hasMore, "There should be more tuples") {
+          return
+        }
+        valueStr := asString(values)
+        makeZero(values)  // Make sure stream has its own copy of values
+        if !assert.Equal(results[j], valueStr) {
+          return
+        }
+      }
     }
-    valueStr := asString(values)
-    makeZero(values)
-    assert.Equal(results[idx], valueStr)
-    idx++
+    stream.Reset()
   }
-  assert.Equal(len(results), idx)
 }
 
 func makeZero(values []int) {
