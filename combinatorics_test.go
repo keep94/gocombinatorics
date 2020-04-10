@@ -139,6 +139,20 @@ func TestProduct(t *testing.T) {
   assert.Panics(func() { gocombinatorics.Product(3, -1) })
 }
 
+func TestCartesian(t *testing.T) {
+  assert := assert.New(t)
+  stream := gocombinatorics.Cartesian(3, 2, 4)
+  assertStream(t, stream,
+      "0 0 0", "0 0 1", "0 0 2", "0 0 3", "0 1 0", "0 1 1", "0 1 2", "0 1 3",
+      "1 0 0", "1 0 1", "1 0 2", "1 0 3", "1 1 0", "1 1 1", "1 1 2", "1 1 3",
+      "2 0 0", "2 0 1", "2 0 2", "2 0 3", "2 1 0", "2 1 1", "2 1 2", "2 1 3")
+  stream = gocombinatorics.Cartesian()
+  assertStream(t, stream, "")
+  stream = gocombinatorics.Cartesian(3, 0, 4)
+  assertStream(t, stream)
+  assert.Panics(func() { gocombinatorics.Cartesian(3, -1) })
+}
+
 func assertStream(
     t *testing.T,
     stream gocombinatorics.Stream,

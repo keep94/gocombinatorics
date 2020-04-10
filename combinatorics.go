@@ -115,6 +115,21 @@ func OpsPosits(k int) Stream {
   return result
 }
 
+// Cartesian returns the cartesian product of
+// (0, 1, 2, ..., s0-1), (0, 1, 2, ..., s1-1), (0, 1, 2, ..., s2-1) etc.
+// For instance, Cartesian(3, 2, 4) yields
+// (0,0,0), (0,0,1), (0,0,2), (0,0,3), (0,1,0), (0,1,1), (0,1,2), (0,1,3),
+// (1,0,0), (1,0,1), (1,0,2), (1,0,3), (1,1,0), (1,1,1), (1,1,2), (1,1,3),
+// (2,0,0), (2,0,1), (2,0,2), (2,0,3), (2,1,0), (2,1,1), (2,1,2), (2,1,3)
+func Cartesian(sizes ...int) Stream {
+  checkAtLeastZero(sizes)
+  sizesCopy := make([]int, len(sizes))
+  copy(sizesCopy, sizes)
+  result := &cartesian{sizes: sizesCopy, values: make([]int, len(sizesCopy))}
+  result.Reset()
+  return result
+}
+
 // Product is like Permutations except that the returned tuples may contain
 // duplicates. For instance, Product(3, 2) yields
 // (0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0), (2,1), (2,2)
@@ -368,6 +383,54 @@ func (p *permutations) increment() {
   }
 }
 
+type cartesian struct {
+  sizes []int
+  values []int
+  done bool
+}
+
+func (c *cartesian) TupleSize() int {
+  return len(c.values)
+}
+
+func (c *cartesian) Next(values []int) bool {
+  if len(values) < len(c.values) {
+    panic(kSliceTooSmall)
+  }
+  if c.done {
+    return false
+  }
+  copy(values, c.values)
+  c.increment()
+  return true
+}
+
+func (c *cartesian) Reset() {
+  c.done = false
+  for i := range c.sizes {
+    if c.sizes[i] == 0 {
+      c.done = true
+      return
+    }
+  }
+  for i := range c.values {
+    c.values[i] = 0
+  }
+}
+
+func (c *cartesian) increment() {
+  idx := len(c.values) - 1
+  for idx >= 0 && c.values[idx] == c.sizes[idx] - 1 {
+    c.values[idx] = 0
+    idx--
+  }
+  if idx < 0 {
+    c.done = true
+    return
+  }
+  c.values[idx]++
+}
+
 type product struct {
   values []int
   n int
@@ -409,4 +472,12 @@ func (p *product) increment() {
     return
   }
   p.values[idx]++
+}
+
+func checkAtLeastZero(sizes []int) {
+  for i := range sizes {
+    if sizes[i] < 0 {
+      panic("All sizes must be at least 0.")
+    }
+  }
 }
