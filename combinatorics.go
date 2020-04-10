@@ -13,6 +13,10 @@ type Stream interface {
   // unchanged. Caller must pass in a slice big enough to hold a tuple.
   Next(values []int) bool
 
+  // TupleSize returns the size of tuples this stream emits. Caller must
+  // pass a slice of at least this size to the Next method.
+  TupleSize() int
+
   // Reset resets this stream to the state it had when it was first created.
   // After calling Reset, Next will yield the first tuple.
   Reset()
@@ -133,6 +137,10 @@ type combinations struct {
   done bool
 }
 
+func (c *combinations) TupleSize() int {
+  return c.k
+}
+
 func (c *combinations) Next(values []int) bool {
   if len(values) < c.k {
     panic(kSliceTooSmall)
@@ -177,6 +185,10 @@ type combinationsWithReplacement struct {
   done bool
 }
 
+func (c *combinationsWithReplacement) TupleSize() int {
+  return c.k
+}
+
 func (c *combinationsWithReplacement) Next(values []int) bool {
   if len(values) < c.k {
     panic(kSliceTooSmall)
@@ -218,6 +230,10 @@ type opsPosits struct {
   values []int
   k int
   done bool
+}
+
+func (o *opsPosits) TupleSize() int {
+  return o.k
 }
 
 func (o *opsPosits) Next(values []int) bool {
@@ -272,6 +288,10 @@ type permutations struct {
   n int
   k int
   done bool
+}
+
+func (p *permutations) TupleSize() int {
+  return p.k
 }
 
 func (p *permutations) Next(values []int) bool {
@@ -353,6 +373,10 @@ type product struct {
   n int
   k int
   done bool
+}
+
+func (p *product) TupleSize() int {
+  return p.k
 }
 
 func (p *product) Next(values []int) bool {
