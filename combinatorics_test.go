@@ -12,6 +12,7 @@ import (
 func TestOpsPosits(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.OpsPosits(4)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"1 2 3 4", "1 2 4 4", "1 3 3 4", "1 3 4 4",
 		"1 4 4 4", "2 2 3 4", "2 2 4 4", "2 3 3 4",
@@ -27,6 +28,7 @@ func TestOpsPosits(t *testing.T) {
 func TestCombinations(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.Combinations(5, 3)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"0 1 2", "0 1 3", "0 1 4", "0 2 3", "0 2 4",
 		"0 3 4", "1 2 3", "1 2 4", "1 3 4", "2 3 4")
@@ -49,6 +51,7 @@ func TestCombinations(t *testing.T) {
 func TestCombinationsWithReplacement(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.CombinationsWithReplacement(2, 3)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"0 0 0", "0 0 1", "0 1 1", "1 1 1")
 	stream = gocombinatorics.CombinationsWithReplacement(3, 4)
@@ -74,6 +77,7 @@ func TestCombinationsWithReplacement(t *testing.T) {
 func TestPermutations(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.Permutations(4, 2)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"0 1", "0 2", "0 3",
 		"1 0", "1 2", "1 3",
@@ -123,6 +127,7 @@ func BenchmarkCombinations(b *testing.B) {
 func TestProduct(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.Product(3, 2)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"0 0", "0 1", "0 2",
 		"1 0", "1 1", "1 2",
@@ -142,6 +147,7 @@ func TestProduct(t *testing.T) {
 func TestCartesian(t *testing.T) {
 	assert := assert.New(t)
 	stream := gocombinatorics.Cartesian(3, 2, 4)
+	assert.Panics(func() { stream.Next(nil) })
 	assertStream(t, stream,
 		"0 0 0", "0 0 1", "0 0 2", "0 0 3", "0 1 0", "0 1 1", "0 1 2", "0 1 3",
 		"1 0 0", "1 0 1", "1 0 2", "1 0 3", "1 1 0", "1 1 1", "1 1 2", "1 1 3",

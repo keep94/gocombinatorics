@@ -1,4 +1,6 @@
-// Package gocombinatorics contains routines useful for combinatorics.
+// Package gocombinatorics contains routines for generating permutations,
+// combinations, and cartesian products of a list of elements similar
+// to what the itertools python module offers.
 package gocombinatorics
 
 const (
@@ -29,6 +31,8 @@ type Stream interface {
 // For instance, Permutations(4,2) yields
 // (0,1), (0,2), (0,3), (1,0), (1,2), (1,3),
 // (2,0), (2,1), (2,3), (3,0), (3,1), (3,2)
+//
+// Deprecated: Use TPermutations instead.
 func Permutations(n, k int) Stream {
 	if n < 0 {
 		panic("n must be greater than or equal to 0")
@@ -58,6 +62,8 @@ func Permutations(n, k int) Stream {
 //
 // For instance, Combinations(4,2) yields
 // (0,1), (0,2), (0,3), (1,2), (1,3), (2,3)
+//
+// Deprecated: Use TCombinations instead.
 func Combinations(n, k int) Stream {
 	if n < 0 {
 		panic("n must be greater than or equal to 0")
@@ -78,6 +84,8 @@ func Combinations(n, k int) Stream {
 // returned tuples may contain duplicates. For instance,
 // CombinationsWithReplacement(4, 2) yields
 // (0,0), (0,1), (0,2), (0,3), (1,1), (1,2), (1,3), (2,2), (2,3), (3,3)
+//
+// Deprecated: Use TCombinationsWithReplacement instead.
 func CombinationsWithReplacement(n, k int) Stream {
 	if n < 0 {
 		panic("n must be greater than or equal to 0")
@@ -133,6 +141,8 @@ func Cartesian(sizes ...int) Stream {
 // Product is like Permutations except that the returned tuples may contain
 // duplicates. For instance, Product(3, 2) yields
 // (0,0), (0,1), (0,2), (1,0), (1,1), (1,2), (2,0), (2,1), (2,2)
+//
+// Deprecated: Use TProduct instead.
 func Product(n, k int) Stream {
 	if n < 0 {
 		panic("n must be greater than or equal to 0")
